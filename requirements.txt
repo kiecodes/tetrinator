@@ -1,5 +1,6 @@
 Kivy==2.1.0
 nes-py==8.2.1
+numpy~=1.23.1
 
 # Gym for easily controlling a training nevirmonment for the AI
 gym==0.24.1  # 0.24.1 because nes-py doesn't support env render_modes, yet
