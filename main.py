@@ -4,6 +4,6 @@ import environment.tetris
 
 environment.tetris.register()
 
-env = gym.make('Tetris-v1', level=5)
+env = gym.make('Tetris-v1', level=5, starting_piece=None)
 
 play_human(env)

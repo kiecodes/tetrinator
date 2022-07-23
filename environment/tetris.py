@@ -1,3 +1,6 @@
+import random
+from enum import Enum
+
 import numpy as np
 from gym.spaces import Box
 from nes_py import NESEnv
@@ -8,10 +11,17 @@ OBSERVATION_SPACE_ROWS = 20
 OBSERVATION_SPACE_COLS = 10
 
 
+class StoneType(Enum):
+    T = 0
+    L = 1
+    J = 2
+    S = 3
+    Z = 4
+    BLOCK = 5
+    I = 6
+
 
 class TetrisEnv(NESEnv):
-    starting_speed_level = 0
-
     observation_space = Box(
         low=0,
         high=5,
@@ -19,13 +29,35 @@ class TetrisEnv(NESEnv):
         dtype=np.uint8
     )
 
-    def __init__(self, level):
+    def __init__(self, level, starting_piece):
         super().__init__('environment/tetris-ntsc.nes')
         self.starting_speed_level = level
 
+        self._starting_block_waiting_time = None
+        if starting_piece is not None:
+            self.set_starting_piece(starting_piece)
+
+    # The initial block is determined by how many frames pass
+    # when we select the level. At least that's what I found
+    # most likely there is another way to set the initial seed
+    # for the game
+    def set_starting_piece(self, stone_type):
+        waiting_time_per_stone_type = {
+            StoneType.T: 0,
+            StoneType.Z: 1,
+            StoneType.S: 3,
+            StoneType.J: 7,
+            StoneType.BLOCK: 8,
+            StoneType.I: 10,
+            StoneType.L: 12,
+        }
+        self._starting_block_waiting_time = waiting_time_per_stone_type[stone_type]
+
+    def _did_reset(self):
+        self._skip_start_screens()
+
     def reset(self, seed=None, options=None, return_info=None):
         super().reset(seed, options, return_info)
-        self._skip_start_screens()
         return self._get_observation()
 
     def step(self, action):
@@ -40,13 +72,13 @@ class TetrisEnv(NESEnv):
         return self.is_game_over
 
     def _skip_start_screens(self):
+        self.ram[0x00A8] = 0x00
         while self.ram[0x00A8] == 0:
             self._frame_advance(0)
         self.ram[0x00A8] = 0x00
         self._frame_advance(0)
         self._frame_advance(8)
         self._frame_advance(0)
-
         while self.ram[5] == 108:
             self._frame_advance(0)
 
@@ -61,9 +93,18 @@ class TetrisEnv(NESEnv):
         self.ram[0x67] = self.starting_speed_level
         self._frame_advance(0)
 
+        if self._starting_block_waiting_time is not None:
+            skip_frames_for_starting_block = self._starting_block_waiting_time
+        else:
+            skip_frames_for_starting_block = random.randint(0, 20)
+
+        for _ in range(skip_frames_for_starting_block):
+            self._frame_advance(0)
+
         while self.ram[5] == 253:
             self._frame_advance(8)
             self._frame_advance(0)
+        return
 
     @property
     def stone_x(self):
@@ -118,7 +159,7 @@ class TetrisEnv(NESEnv):
         for y in range(4):
             for x in range(4):
                 if cur_stone_map[y * 4 + x] == 1:
-                    lines[self.stone_y-3+y][self.stone_x-2+x] = 5
+                    lines[self.stone_y - 3 + y][self.stone_x - 2 + x] = 5
 
         return np.array(lines, dtype=uint8)
 
