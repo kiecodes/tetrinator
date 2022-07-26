@@ -34,7 +34,7 @@ class TetrisView(Widget):
         width = self.height / self.viewport_size[1] * self.viewport_size[0]
 
         self.rect.size = (width, self.height)
-        self.rect.pos = (0, self.y)
+        self.rect.pos = (self.x, self.y)
 
     def render(self, dt):
         if self.get_video_func is None:

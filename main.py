@@ -5,10 +5,37 @@ import gym
 import numpy as np
 
 import environment.tetris
+from model import AppState
 from ui.app import Tetrinator
 
 environment.tetris.register()
 video_data = np.zeros((240, 256, 3), dtype=np.uint8)
+
+app_state = AppState()
+app_state.add_generation(10, 100)
+app_state.add_generation(13, 102)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
+app_state.add_generation(14, 110)
 
 
 def play(env):
@@ -40,5 +67,7 @@ if __name__ == '__main__':
         name="Playback"
     )
     play_thread.start()
+
+    app.update(app_state)
 
     app.run()

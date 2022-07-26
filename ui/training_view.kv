@@ -2,9 +2,16 @@
 #:import TetrisView ui.tetris_view
 
 <TrainingView>
+    generations_view: generations_view
     tetris_view: tetris_view
 
     TetrisView:
         id: tetris_view
+        height: root.height
+        pos: 200, 0
+
+    GenerationsView:
+        id: generations_view
+        width: 200
         height: root.height
 

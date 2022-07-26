@@ -1,0 +1,32 @@
+<GenerationsEntryView>:
+    size_hint: (1, None)
+    height: 64
+    canvas.before:
+        Color:
+            rgb: (1, .6, 0) if root.selected else (.2, .2, .2)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    BoxLayout:
+        padding: [2, 2]
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        Label:
+            markup: True
+            text: f"[b]Gen #{root.generation_id}[/b]"
+
+        Label:
+            text: f"{root.max_fitness} - {root.min_fitness}"
+
+<GenerationsView>
+    stack: stack
+    ScrollView:
+        size: root.size
+        do_scroll_x: False
+        do_scroll_y: True
+        StackLayout:
+            id: stack
+            spacing: 2
+            size_hint_y: None
+            height:self.minimum_height

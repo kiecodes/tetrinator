@@ -1,6 +1,7 @@
 from kivy.app import App
 
-from ui.training_view import TrainingView
+from model import AppState
+from ui import TrainingView
 
 
 class Tetrinator(App):
@@ -11,3 +12,6 @@ class Tetrinator(App):
 
     def build(self):
         return self.training_view
+
+    def update(self, state: AppState):
+        self.training_view.update(state)
