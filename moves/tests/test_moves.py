@@ -1,6 +1,6 @@
 import unittest
 
-from moves import Field, Stone, Evaluation, evaluate_all_possible_moves
+from moves import Field, Stone, Evaluation, Move, evaluate_all_possible_moves
 from moves.moves import insert_stone, StoneOutOfFieldError, StonesInterceptionError, place_stone
 
 
@@ -93,27 +93,27 @@ class TestMoves(unittest.TestCase):
 
     def test_positioning_next_to_other_stone(self):
         field = Field(data=[
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
-                [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            ])
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ])
         stone = Stone(0)
         field = insert_stone(field, stone, 4, 15)
 
@@ -173,8 +173,10 @@ class TestMoves(unittest.TestCase):
     def test_place_stone_in_empty_field(self):
         field = Field()
         stone = Stone(0)
-        field = place_stone(field, stone, -1)
+        x, y, field = place_stone(field, stone, -1)
 
+        self.assertEqual(-1, x)
+        self.assertEqual(16, y)
         self.assertEqual(
             field,
             Field(data=[
@@ -205,7 +207,10 @@ class TestMoves(unittest.TestCase):
         field = Field()
         field.set(0, 19, 1)
         stone = Stone(0)
-        field = place_stone(field, stone, -1)
+        x, y, field = place_stone(field, stone, -1)
+
+        self.assertEqual(-1, x)
+        self.assertEqual(15, y)
 
         self.assertEqual(
             field,
@@ -237,7 +242,10 @@ class TestMoves(unittest.TestCase):
         field = Field()
         field.set(0, 12, 1)
         stone = Stone(0)
-        field = place_stone(field, stone, -1)
+        x, y, field = place_stone(field, stone, -1)
+
+        self.assertEqual(-1, x)
+        self.assertEqual(8, y)
 
         self.assertEqual(
             field,
@@ -268,40 +276,55 @@ class TestMoves(unittest.TestCase):
     def test_evaluate_all_possible_moves_on_empty_field_with_square(self):
         result = evaluate_all_possible_moves(Field(), Stone(10))
         self.assertEqual(
-            Evaluation(
-                height=2,
-                lines_cleared=0,
-                holes=0,
-                bumpiness=2,
-                bumps=1,
-                bump_ratio=0.2222222222222222
+            Move(
+                evaluation=Evaluation(
+                    height=2,
+                    lines_cleared=0,
+                    holes=0,
+                    bumpiness=2,
+                    bumps=1,
+                    bump_ratio=0.2222222222222222
+                ),
+                stone_x=-1,
+                stone_y=16,
+                stone_id=10
             ),
             result[0]
         )
 
         for i in range(1, 8):
             self.assertEqual(
-                Evaluation(
-                    height=2,
-                    lines_cleared=0,
-                    holes=0,
-                    bumpiness=4,
-                    bumps=2,
-                    bump_ratio=0.5
+                Move(
+                    evaluation=Evaluation(
+                        height=2,
+                        lines_cleared=0,
+                        holes=0,
+                        bumpiness=4,
+                        bumps=2,
+                        bump_ratio=0.5
+                    ),
+                    stone_x=i-1,
+                    stone_y=16,
+                    stone_id=10
                 ),
                 result[i]
             )
 
         self.assertEqual(
-            Evaluation(
-                height=2,
-                lines_cleared=0,
-                holes=0,
-                bumpiness=2,
-                bumps=1,
-                bump_ratio=0.2222222222222222
+            Move(
+                evaluation=Evaluation(
+                    height=2,
+                    lines_cleared=0,
+                    holes=0,
+                    bumpiness=2,
+                    bumps=1,
+                    bump_ratio=0.2222222222222222
+                ),
+                stone_x=-1,
+                stone_y=16,
+                stone_id=10
             ),
-            result[8]
+            result[0]
         )
 
 

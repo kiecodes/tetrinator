@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from moves import Field
 from moves.field import FIELD_COLS, FIELD_ROWS

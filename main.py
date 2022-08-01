@@ -5,7 +5,9 @@ import gym
 import numpy as np
 
 import environment.tetris
+from controller import Controller
 from model import AppState
+from moves import Field, Stone, evaluate_all_possible_moves
 from ui.app import Tetrinator
 
 environment.tetris.register()
@@ -38,23 +40,40 @@ app_state.add_generation(14, 110)
 app_state.add_generation(14, 110)
 
 
+def choose_best_move(observation, stone_id):
+    field = Field(data=observation.tolist())
+    stone = Stone(stone_id)
+    moves = evaluate_all_possible_moves(field, stone)
+
+    rankings = [-m.evaluation.height - m.evaluation.bumps - m.evaluation.bump_ratio + 2 * m.evaluation.lines_cleared for
+                m in moves]
+    best_index = max(range(len(rankings)), key=rankings.__getitem__)
+
+    return moves[best_index]
+
+
 def play(env):
     global video_data
     frame_length = 1 / 60.1
     env.reset()
 
     done = False
+
+    controller = Controller(
+        env=env,
+        get_move_func=lambda observation, info: choose_best_move(observation_data, info["stone_id"])
+    )
     while not done:
         start = time.time()
         video_data = env.render(mode="rgb_array")
         observation_data, reward, done, info = env.step(0)
+        controller.action()
         end = time.time()
         time.sleep(max(0.0, frame_length - (end - start)))
     exit(0)
 
 
 if __name__ == '__main__':
-
     print(f"Starting game")
     env = gym.make('Tetris-v1', level=5, starting_piece=None)
 

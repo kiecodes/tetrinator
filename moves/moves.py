@@ -1,5 +1,6 @@
 from copy import deepcopy
-from typing import List
+from dataclasses import dataclass
+from typing import List, Tuple
 
 from moves import Field, Stone, Evaluation
 from moves.evaluate import evaluate_field
@@ -33,27 +34,39 @@ def insert_stone(field: Field, stone: Stone, x: int, y: int) -> Field:
     return field_copy
 
 
-def place_stone(field: Field, stone: Stone, col: int) -> Field:
+def place_stone(field: Field, stone: Stone, col: int) -> Tuple[int, int, Field]:
     stone_offset = stone.get_height()-STONE_SIZE
     for y in range(stone_offset, FIELD_ROWS-STONE_SIZE+1):
         try:
             insert_stone(field, stone, col, y)
         except StonesInterceptionError:
-            return insert_stone(field, stone, col, y-1)
+            return col, y-1, insert_stone(field, stone, col, y-1)
 
-    return insert_stone(field, stone, col, FIELD_ROWS-STONE_SIZE)
+    return col, FIELD_ROWS-STONE_SIZE, insert_stone(field, stone, col, FIELD_ROWS-STONE_SIZE)
 
 
-def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Evaluation]:
-    evaluations = []
+@dataclass
+class Move:
+    evaluation: Evaluation
+    stone_x: int
+    stone_y: int
+    stone_id: int
+
+
+def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Move]:
+    moves = []
     for _ in range(stone.num_rotations()):
         for col in range(-2, FIELD_COLS-2):
             try:
-                evaluations.append(
-                    evaluate_field(
-                        place_stone(field, stone, col)
-                    )
-                )
+                x, y, resulting_field = place_stone(field, stone, col)
+                evaluation = evaluate_field(resulting_field)
+                moves.append(Move(
+                    evaluation=evaluation,
+                    stone_x=x,
+                    stone_y=y,
+                    stone_id=stone.stone_id
+                ))
             except StoneOutOfFieldError:
                 pass
-    return evaluations
+        stone.rotate()
+    return moves

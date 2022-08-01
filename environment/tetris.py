@@ -5,10 +5,13 @@ import numpy as np
 from gym.spaces import Box
 from nes_py import NESEnv
 import gym
-from numpy import uint8
+from numpy import uint8, ndarray
 
 OBSERVATION_SPACE_ROWS = 20
 OBSERVATION_SPACE_COLS = 10
+
+
+Observation = ndarray
 
 
 class StoneType(Enum):
@@ -62,9 +65,16 @@ class TetrisEnv(NESEnv):
 
     def step(self, action):
         _, reward, done, info = super().step(action)
-        return self._get_observation(), reward, done, info
+        return self._get_observation(), reward, done, {
+            "stone_x": self.stone_x,
+            "stone_y": self.stone_y,
+            "stone_id": self.stone_id,
+            "next_stone_id": self.next_stone_id,
+            "stone_index": self.num_stones
+        }
 
     def _did_step(self, done):
+        # print("\t".join(map(str, list(self.ram))))
         if done:
             return
 
@@ -104,6 +114,9 @@ class TetrisEnv(NESEnv):
         while self.ram[5] == 253:
             self._frame_advance(8)
             self._frame_advance(0)
+
+        while self.ram[26] == 0:
+            self._frame_advance(0)
         return
 
     @property
@@ -131,6 +144,18 @@ class TetrisEnv(NESEnv):
         self.ram[0x62] = value
 
     @property
+    def next_stone_id(self):
+        return self.ram[0x19]
+
+    @next_stone_id.setter
+    def next_stone_id(self, value):
+        self.ram[0x19] = value
+
+    @property
+    def num_stones(self):
+        return self.ram[0x1A]-2
+
+    @property
     def num_clearing_lines(self):
         return self.ram[0x56]
 
@@ -155,116 +180,7 @@ class TetrisEnv(NESEnv):
             start = offset + line * OBSERVATION_SPACE_COLS
             lines.append([0 if i == 239 else 1 for i in self.ram[start:start + OBSERVATION_SPACE_COLS]])
 
-        cur_stone_map = self._stone_map_from_id(self.stone_id)
-        for y in range(4):
-            for x in range(4):
-                if cur_stone_map[y * 4 + x] == 1:
-                    lines[self.stone_y - 3 + y][self.stone_x - 2 + x] = 5
-
         return np.array(lines, dtype=uint8)
-
-    @staticmethod
-    def _stone_map_from_id(stone_id):
-        if stone_id == 0:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 1, 1, 1]
-        elif stone_id == 1:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 1,
-                    0, 0, 1, 0]
-        elif stone_id == 2:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 1,
-                    0, 0, 1, 0]
-        elif stone_id == 3:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 1, 1, 0,
-                    0, 0, 1, 0]
-        elif stone_id == 4:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0,
-                    0, 1, 1, 0]
-        elif stone_id == 5:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 0, 0,
-                    0, 1, 1, 1]
-        elif stone_id == 6:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 1,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0]
-        elif stone_id == 7:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 1,
-                    0, 0, 0, 1]
-        elif stone_id == 8:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 0,
-                    0, 0, 1, 1]
-        elif stone_id == 9:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 1,
-                    0, 0, 1, 1,
-                    0, 0, 1, 0]
-        elif stone_id == 10:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 0,
-                    0, 1, 1, 0]
-        elif stone_id == 11:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 1, 1,
-                    0, 1, 1, 0]
-        elif stone_id == 12:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 1,
-                    0, 0, 0, 1]
-        elif stone_id == 13:
-            return [0, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 1]
-        elif stone_id == 14:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 1, 1, 1,
-                    0, 1, 0, 0]
-        elif stone_id == 15:
-            return [0, 0, 0, 0,
-                    0, 1, 1, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0]
-        elif stone_id == 16:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 1,
-                    0, 1, 1, 1]
-        elif stone_id == 17:
-            return [0, 0, 1, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0,
-                    0, 0, 1, 0]
-        elif stone_id == 18:
-            return [0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    0, 0, 0, 0,
-                    1, 1, 1, 1]
-        else:
-            return [1, 1, 1, 1,
-                    1, 1, 1, 1,
-                    1, 1, 1, 1,
-                    1, 1, 1, 1]
 
 
 def register():
