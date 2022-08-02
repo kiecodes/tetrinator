@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 from moves import Field
 from moves.field import FIELD_COLS, FIELD_ROWS
@@ -66,6 +66,7 @@ class Evaluation:
     bumpiness: int
     bumps: int
     bump_ratio: float
+    field: Field
 
 
 def evaluate_field(field: Field) -> Evaluation:
@@ -78,5 +79,6 @@ def evaluate_field(field: Field) -> Evaluation:
         holes=evaluate_holes(field),
         bumpiness=evaluate_bumpiness(field),
         bumps=evaluate_bumps(field),
-        bump_ratio=bumpiness/(FIELD_COLS-bumps)
+        bump_ratio=bumpiness/(FIELD_COLS-bumps),
+        field=field
     )

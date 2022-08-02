@@ -46,3 +46,7 @@ class Field:
 
     def __repr__(self) -> str:
         return "\n"+"\n".join(map(lambda row: ",".join(map(str, row)), self._data))+"\n"
+
+    def print(self):
+        print("\n"+"\n".join(map(lambda row: "".join(map(lambda e: "▓▓" if e > 0 else "░░", row)), self._data))+"\n")
+

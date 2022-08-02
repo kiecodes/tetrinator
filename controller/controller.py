@@ -29,14 +29,24 @@ class Controller:
         observation_data, reward, done, info = self.env.step(self.next_action.value)
         if self.last_stone_index < info["stone_index"]:
             self.last_stone_index = info["stone_index"]
-            print("next move")
             self.move = self.get_move_func(observation_data, info)
-
-        if info["stone_id"] != self.move.stone_id:
-            self.next_action = ButtonAction.A
-        elif info["stone_x"] > self.move.stone_x:
-            self.next_action =  ButtonAction.LEFT
-        elif info["stone_x"] < self.move.stone_x:
-            self.next_action = ButtonAction.RIGHT
+            self.move.evaluation.field.print()
+            self.next_action = ButtonAction.NOTHING  # release button at for one frame
         else:
-            self.next_action = ButtonAction.NOTHING
+            current_x = info["stone_x"]
+            target_x = self.move.stone_x+2
+
+            current_id = info["stone_id"]
+            target_id = self.move.stone_id
+
+            # Release Button after rotation for one frame
+            if self.next_action == ButtonAction.B:
+                self.next_action = ButtonAction.NOTHING
+            elif current_id != target_id:
+                self.next_action = ButtonAction.B
+            elif info["stone_x"] > target_x:
+                self.next_action = ButtonAction.LEFT
+            elif info["stone_x"] < target_x:
+                self.next_action = ButtonAction.RIGHT
+            else:
+                self.next_action = ButtonAction.DOWN

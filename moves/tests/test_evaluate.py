@@ -285,7 +285,8 @@ class TestEvaluate(unittest.TestCase):
                 holes=0,
                 bumpiness=0,
                 bumps=0,
-                bump_ratio=0
+                bump_ratio=0,
+                field=Field()
             ),
             evaluate_field(Field())
         )
@@ -320,7 +321,8 @@ class TestEvaluate(unittest.TestCase):
                 holes=0,
                 bumpiness=4,
                 bumps=1,
-                bump_ratio=0.4444444444444444
+                bump_ratio=0.4444444444444444,
+                field=field
             ),
             evaluate_field(field)
         )
@@ -355,7 +357,8 @@ class TestEvaluate(unittest.TestCase):
                 holes=0,
                 bumpiness=10,
                 bumps=9,
-                bump_ratio=10.0
+                bump_ratio=10.0,
+                field=field
             ),
             evaluate_field(field)
         )
