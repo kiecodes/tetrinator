@@ -72,3 +72,18 @@ def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Move]:
                 pass
         stone.rotate()
     return moves
+
+
+def evaluate_all_possible_moves_including_next_stone(field: Field, stone: Stone, next_stone: Stone) -> List[Move]:
+    moves = []
+    first_moves = evaluate_all_possible_moves(field, stone)
+    for first_move in first_moves:
+        second_moves = evaluate_all_possible_moves(first_move.evaluation.field, next_stone)
+        for second_move in second_moves:
+            moves.append(Move(
+                evaluation=second_move.evaluation,
+                stone_x=first_move.stone_x,
+                stone_y=first_move.stone_y,
+                stone_id=first_move.stone_id
+            ))
+    return moves

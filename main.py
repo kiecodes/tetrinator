@@ -8,6 +8,7 @@ import environment.tetris
 from controller import Controller
 from model import AppState
 from moves import Field, Stone, evaluate_all_possible_moves
+from moves.moves import evaluate_all_possible_moves_including_next_stone
 from ui.app import Tetrinator
 
 environment.tetris.register()
@@ -40,10 +41,13 @@ app_state.add_generation(14, 110)
 app_state.add_generation(14, 110)
 
 
-def choose_best_move(observation, stone_id):
+def choose_best_move(observation, stone_id, next_stone_id = None):
     field = Field(data=observation.tolist())
-    stone = Stone(stone_id)
-    moves = evaluate_all_possible_moves(field, stone)
+
+    if next_stone_id is None:
+        moves = evaluate_all_possible_moves(field, Stone(stone_id))
+    else:
+        moves = evaluate_all_possible_moves_including_next_stone(field, Stone(stone_id), Stone(next_stone_id))
 
     rankings = [-2*m.evaluation.holes - m.evaluation.bump_ratio + 2 * m.evaluation.lines_cleared for
                 m in moves]
@@ -61,7 +65,7 @@ def play(env):
 
     controller = Controller(
         env=env,
-        get_move_func=lambda observation, info: choose_best_move(observation, info["stone_id"])
+        get_move_func=lambda observation, info: choose_best_move(observation, info["stone_id"], info["next_stone_id"])
     )
     while not done:
         start = time.time()
