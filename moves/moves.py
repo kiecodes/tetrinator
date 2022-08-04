@@ -68,5 +68,7 @@ def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Move]:
                 ))
             except StoneOutOfFieldError:
                 pass
+            except StonesInterceptionError:
+                pass
         stone.rotate()
     return moves
