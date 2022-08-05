@@ -145,11 +145,11 @@ class TetrisEnv(NESEnv):
 
     @property
     def next_stone_id(self):
-        return self.ram[0x19]
+        return self.ram[191]
 
     @next_stone_id.setter
     def next_stone_id(self, value):
-        self.ram[0x19] = value
+        self.ram[191] = value
 
     @property
     def num_stones(self):
