@@ -70,9 +70,11 @@ def play(env):
     while not done:
         start = time.time()
         video_data = env.render(mode="rgb_array")
-        controller.action()
-        end = time.time()
-        time.sleep(max(0.0, frame_length - (end - start)))
+        if controller.action():
+            end = time.time()
+            time.sleep(max(0.0, frame_length - (end - start)))
+        else:
+            env.reset()
     exit(0)
 
 

@@ -25,9 +25,11 @@ class Controller:
         self.move: Optional[Move] = None
         self.next_action = ButtonAction.NOTHING
 
-    def action(self):
+    def action(self) -> bool:
         observation_data, reward, done, info = self.env.step(self.next_action.value)
-        if self.last_stone_index < info["stone_index"]:
+        if done:
+            return False
+
         if not info["is_animating"] and self.last_stone_index != info["stone_index"]:
             self.last_stone_index = info["stone_index"]
             observation_data, reward, done, info = self.env.step(self.next_action.value)
@@ -47,3 +49,5 @@ class Controller:
                 self.next_action = ButtonAction.RIGHT
             else:
                 self.next_action = ButtonAction.DOWN
+
+        return True
