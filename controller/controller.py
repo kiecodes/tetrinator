@@ -28,6 +28,7 @@ class Controller:
     def action(self):
         observation_data, reward, done, info = self.env.step(self.next_action.value)
         if self.last_stone_index < info["stone_index"]:
+        if not info["is_animating"] and self.last_stone_index != info["stone_index"]:
             self.last_stone_index = info["stone_index"]
             self.move = self.get_move_func(observation_data, info)
             self.move.evaluation.field.print()
@@ -40,7 +41,7 @@ class Controller:
             target_id = self.move.stone_id
 
             # Release Button after rotation for one frame
-            if self.next_action == ButtonAction.B:
+            if self.next_action == ButtonAction.B or info["is_animating"]:
                 self.next_action = ButtonAction.NOTHING
             elif current_id != target_id:
                 self.next_action = ButtonAction.B

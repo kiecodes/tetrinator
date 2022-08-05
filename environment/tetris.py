@@ -70,7 +70,8 @@ class TetrisEnv(NESEnv):
             "stone_y": self.stone_y,
             "stone_id": self.stone_id,
             "next_stone_id": self.next_stone_id,
-            "stone_index": self.num_stones
+            "stone_index": self.num_stones,
+            "is_animating": self.is_animating
         }
 
     def _did_step(self, done):
@@ -170,6 +171,10 @@ class TetrisEnv(NESEnv):
     @property
     def is_game_over(self):
         return self.ram[0x58] != 0
+
+    @property
+    def is_animating(self):
+        return self.ram[86] != 0 or self.stone_id > 18
 
     def _get_observation(self):
         offset = 1024
