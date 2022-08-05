@@ -30,6 +30,7 @@ class Controller:
         if self.last_stone_index < info["stone_index"]:
         if not info["is_animating"] and self.last_stone_index != info["stone_index"]:
             self.last_stone_index = info["stone_index"]
+            observation_data, reward, done, info = self.env.step(self.next_action.value)
             self.move = self.get_move_func(observation_data, info)
             self.next_action = ButtonAction.NOTHING  # release button at for one frame
         else:
