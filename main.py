@@ -41,7 +41,7 @@ app_state.add_generation(14, 110)
 app_state.add_generation(14, 110)
 
 
-def choose_best_move(observation, stone_id, next_stone_id = None):
+def choose_best_move(observation, stone_id, next_stone_id=None):
     field = Field(data=observation.tolist())
 
     if next_stone_id is None:
