@@ -1,1 +1,2 @@
-from controller.controller import Controller
+from controller.synchronous_controller import SynchronousController
+from controller.asyncronous_controller import AsynchronousController

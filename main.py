@@ -5,7 +5,7 @@ import gym
 import numpy as np
 
 import environment.tetris
-from controller import Controller
+from controller import AsynchronousController
 from model import AppState
 from moves import Field, Stone, evaluate_all_possible_moves
 from moves.moves import evaluate_all_possible_moves_including_next_stone
@@ -63,7 +63,7 @@ def play(env):
 
     done = False
 
-    controller = Controller(
+    controller = AsynchronousController(
         env=env,
         get_move_func=lambda observation, info: choose_best_move(observation, info["stone_id"], info["next_stone_id"])
     )
