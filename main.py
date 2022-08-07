@@ -7,23 +7,21 @@ from typing import List
 
 import gym
 import numpy as np
+from kivy.clock import Clock
 
 import environment.tetris
 import genetic.genetic
 from controller import AsynchronousController, SynchronousController
-from model import AppState
 from moves import Field, Stone, evaluate_all_possible_moves
 from moves.moves import evaluate_all_possible_moves_including_next_stone
 from ui.app import Tetrinator
+from ui.model import Generation
 from worker import Worker
 
 POPULATION_SIZE = 8
 
 environment.tetris.register()
 video_data = np.zeros((240, 256, 3), dtype=np.uint8)
-
-app_state = AppState()
-app_state.add_generation(10, 100)
 
 
 def choose_best_move(observation, stone_id, next_stone_id=None):
@@ -41,8 +39,28 @@ def choose_best_move(observation, stone_id, next_stone_id=None):
     return moves[best_index]
 
 
-def play(env):
+def on_genome_selected(generation: Generation):
+    global play_thread
+    global kill_play
+
+    if play_thread is not None and play_thread.is_alive():
+        print("killing …")
+        kill_play = True
+        play_thread.join()
+        print("killed")
+        kill_play = False
+
+    play_thread = Thread(
+        target=play,
+        args=(env,generation.genome),
+        name="Playback"
+    )
+    play_thread.start()
+
+
+def play(env: environment.TetrisEnv, genome: List[float]):
     global video_data
+    global kill_play
     frame_length = 1 / 60.1
     env.reset()
 
@@ -50,9 +68,12 @@ def play(env):
 
     controller = AsynchronousController(
         env=env,
-        get_move_func=lambda observation, info: choose_best_move(observation, info["stone_id"], info["next_stone_id"])
+        get_move_func=lambda observation, info: choose_best_move_for_genome(
+            genome=genome,
+            observation=observation,
+            stone_id=info["stone_id"])
     )
-    while not done:
+    while not done and not kill_play:
         start = time.time()
         video_data = env.render(mode="rgb_array")
         if controller.action():
@@ -76,14 +97,15 @@ def choose_best_move_for_genome(genome: List[float], observation, stone_id, next
             genome[0] * m.evaluation.holes +
             genome[1] * m.evaluation.lines_cleared +
             genome[2] * m.evaluation.height +
-            genome[2] * m.evaluation.bump_ratio +
-            genome[3] * m.evaluation.bumps +
+            genome[3] * m.evaluation.bump_ratio +
+            genome[4] * m.evaluation.bumps +
             genome[5] * m.evaluation.bumpiness
             for m in moves]
         best_index = max(range(len(rankings)), key=rankings.__getitem__)
         return moves[best_index]
     else:
         return None
+
 
 fitness_cache = {}
 
@@ -135,6 +157,12 @@ def print_evolution_status(generation: int, population: genetic.RatedPopulation)
     print(f"[{generation}] max fitness: {max_fitness}\tmin fitness: {min_fitness}")
 
 
+def add_generation_to_ui(generation: int, population: genetic.RatedPopulation, app: Tetrinator):
+    max_fitness = population[0][1]
+    min_fitness = population[len(population) - 1][1]
+    Clock.schedule_once(lambda _: app.add_generation(min_fitness, max_fitness, population[0][0]))
+
+
 def evolution(app: Tetrinator, worker: Worker):
     print("Starting evolution")
     genetic.run_evolution(
@@ -144,7 +172,7 @@ def evolution(app: Tetrinator, worker: Worker):
         selection_func=genetic.selection_pair,
         crossover_func=genetic.single_point_crossover,
         mutation_func=mutate,
-        status_func=print_evolution_status
+        status_func=partial(add_generation_to_ui, app=app)
     )
     print("Evolution DONE")
 
@@ -158,19 +186,15 @@ if __name__ == '__main__':
     print(f"Starting game")
     env = gym.make('Tetris-v1', level=5, starting_piece=None)
 
-    app = Tetrinator()
+    app = Tetrinator(
+        on_generation_selected=on_genome_selected
+    )
     app.training_view.tetris_view.get_video_func = lambda: video_data
 
-    play_thread = Thread(
-        target=play,
-        args=(env,),
-        name="Playback"
-    )
-    play_thread.start()
+    kill_play = False
+    play_thread = None
 
     t = Thread(target=evolution, args=(app, worker), name="Evolution")
     t.start()
-
-    app.update(app_state)
 
     app.run()

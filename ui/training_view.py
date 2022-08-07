@@ -2,7 +2,7 @@ from kivy.lang import Builder
 from kivy.properties import ObjectProperty
 from kivy.uix.widget import Widget
 
-from model import AppState
+from ui.model import AppState
 
 Builder.load_file('ui/training_view.kv')
 

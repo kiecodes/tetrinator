@@ -1,18 +1,16 @@
 from kivy.lang import Builder
 from kivy.properties import NumericProperty, BooleanProperty, ObjectProperty
-from kivy.uix.stacklayout import StackLayout
 from kivy.uix.widget import Widget
 
-from model import AppState
+from ui.model import AppState, Generation
 
 Builder.load_file('ui/generations_view.kv')
 
 
 class GenerationsEntryView(Widget):
     generation_id = NumericProperty()
-    max_fitness = NumericProperty()
-    min_fitness = NumericProperty()
     selected = BooleanProperty(False)
+    generation = ObjectProperty()
 
     click_handler = None
 
@@ -27,24 +25,19 @@ class GenerationsEntryView(Widget):
 
 
 class GenerationsView(Widget):
-
     stack = ObjectProperty(None)
     generation_selected_handler = None
     selected_generation_idx = None
     entries = []
 
-    def __init__(self, **kwargs):
-        if "generation_selected_handler" in kwargs:
-            self.generation_selected_handler = kwargs.pop("generation_selected_handler")
-        super().__init__(**kwargs)
-
     def update(self, state: AppState):
+        self.generation_selected_handler = state.on_generation_selected
         self.entries = [
             GenerationsEntryView(
                 generation_id=i,
-                min_fitness=g.min_fitness,
-                max_fitness=g.max_fitness,
-                click_handler=lambda _, i=i: self.on_generation_selected(i)
+                selected=i == self.selected_generation_idx,
+                generation=g,
+                click_handler=lambda _, i=i: self.on_generation_selected(i, g)
             ) for i, g in enumerate(state.generations)
         ]
 
@@ -52,6 +45,12 @@ class GenerationsView(Widget):
         for entry in self.entries:
             self.stack.add_widget(entry)
 
-    def on_generation_selected(self, generation_id: int):
+    def on_generation_selected(self, index: int, generation: Generation):
+        if self.selected_generation_idx is not None:
+            self.entries[self.selected_generation_idx].selected = False
+
+        self.entries[index].selected = True
+        self.selected_generation_idx = index
+
         if self.generation_selected_handler:
-            self.generation_selected_handler(generation_id)
+            self.generation_selected_handler(generation)
