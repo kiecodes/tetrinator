@@ -1,2 +1,2 @@
-from model.Generation import Generation
-from model.AppState import AppState
+from model.generation import Generation
+from model.app_state import AppState
