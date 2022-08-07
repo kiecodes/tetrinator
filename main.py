@@ -5,7 +5,7 @@ import gym
 import numpy as np
 
 import environment.tetris
-from controller import AsynchronousController
+from controller import AsynchronousController, SynchronousController
 from model import AppState
 from moves import Field, Stone, evaluate_all_possible_moves
 from moves.moves import evaluate_all_possible_moves_including_next_stone
