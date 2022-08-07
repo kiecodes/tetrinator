@@ -1,5 +1,6 @@
 import random
 from enum import Enum
+from typing import List
 
 import numpy as np
 from gym.spaces import Box
@@ -163,11 +164,11 @@ class TetrisEnv(NESEnv):
 
     @property
     def num_cleared_lines(self):
-        return int.from_bytes(b''.join(self.ram[0x50:0x52]), byteorder="little")
+        return self._decode_bcd_little_endian(self.ram[0x50:0x52].tolist())
 
     @property
     def score(self):
-        return int.from_bytes(b''.join(self.ram[0x53:0x56]), byteorder="little")
+        return self._decode_bcd_little_endian(self.ram[0x53:0x56].tolist())
 
     @property
     def is_game_over(self):
@@ -187,6 +188,13 @@ class TetrisEnv(NESEnv):
             lines.append([0 if i == 239 else 1 for i in self.ram[start:start + OBSERVATION_SPACE_COLS]])
 
         return np.array(lines, dtype=uint8)
+
+    @staticmethod
+    def _decode_bcd_little_endian(bytes: List[int]) -> int:
+        result = ""
+        for byte in bytes:
+            result = str(int(format(byte, "b").zfill(8)[0:4], 2)) + str(int(format(byte, "b").zfill(8)[4:], 2)) + result
+        return int(result)
 
 
 def register():
