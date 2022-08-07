@@ -71,7 +71,8 @@ class TetrisEnv(NESEnv):
             "stone_id": self.stone_id,
             "next_stone_id": self.next_stone_id,
             "stone_index": self.num_stones,
-            "is_animating": self.is_animating
+            "is_animating": self.is_animating,
+            "score": self.score
         }
 
     def _did_step(self, done):

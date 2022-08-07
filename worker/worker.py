@@ -15,6 +15,10 @@ class Worker:
         self._worker_lock = [0] * num_worker
         self._lock = threading.Lock()
 
+    @property
+    def count(self):
+        return len(self._worker)
+
     def acquire(self) -> Tuple[int, T]:
         self._lock.acquire()
         try:

@@ -12,9 +12,11 @@ class BaseController:
         self.get_move_func = get_move_func
         self.move: Optional[Move] = None
         self.next_action = ButtonAction.NOTHING
+        self.score = 0
 
     def action(self) -> bool:
         observation_data, reward, done, info = self.env.step(self.next_action.value)
+        self.score = info["score"]
         if done:
             return False
 
