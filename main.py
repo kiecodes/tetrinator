@@ -18,7 +18,7 @@ from ui.app import Tetrinator
 from ui.model import Generation
 from worker import Worker
 
-POPULATION_SIZE = 8
+POPULATION_SIZE = 16
 
 environment.tetris.register()
 video_data = np.zeros((240, 256, 3), dtype=np.uint8)
@@ -71,7 +71,9 @@ def play(env: environment.TetrisEnv, genome: List[float]):
         get_move_func=lambda observation, info: choose_best_move_for_genome(
             genome=genome,
             observation=observation,
-            stone_id=info["stone_id"])
+            stone_id=info["stone_id"],
+            next_stone_id=info["next_stone_id"]
+        )
     )
     while not done and not kill_play:
         start = time.time()
@@ -119,7 +121,12 @@ def genome_fitness(genome: List[float], worker: Worker) -> int:
 
     controller = SynchronousController(
         env=env,
-        get_move_func=lambda observation, info: choose_best_move_for_genome(genome, observation, info['stone_id'])
+        get_move_func=lambda observation, info: choose_best_move_for_genome(
+            genome=genome,
+            observation=observation,
+            stone_id=info['stone_id'],
+            next_stone_id=info['next_stone_id']
+        ),
     )
 
     env.reset()
@@ -142,7 +149,7 @@ def fitness(population: genetic.Population, worker: Worker) -> List[int]:
     return fitness_data
 
 
-def mutate(genome: List[float], num: int = 1, probability: float = 0.5, spread: float = 0.5) -> List[float]:
+def mutate(genome: List[float], num: int = 3, probability: float = 0.5, spread: float = 0.5) -> List[float]:
     for _ in range(num):
         index = random.randrange(len(genome))
         if random.random() > probability:
@@ -179,7 +186,7 @@ def evolution(app: Tetrinator, worker: Worker):
 
 if __name__ == '__main__':
     worker = Worker(
-        num_worker=16,
+        num_worker=4,
         creation_func=lambda: gym.make('Tetris-v1', level=5, starting_piece=None)
     )
 
