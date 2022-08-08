@@ -77,8 +77,8 @@ def evaluate_field(field: Field) -> Evaluation:
         height=evaluate_height(field),
         lines_cleared=evaluate_lines_cleared(field),
         holes=evaluate_holes(field),
-        bumpiness=evaluate_bumpiness(field),
-        bumps=evaluate_bumps(field),
+        bumpiness=bumpiness,
+        bumps=bumps,
         bump_ratio=bumpiness/(FIELD_COLS-bumps),
         field=field
     )
