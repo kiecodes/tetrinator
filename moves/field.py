@@ -17,24 +17,15 @@ class Field:
             self._data = [([0] * FIELD_COLS) for _ in range(FIELD_ROWS)]
 
     def set(self, x, y, value):
-        assert value == 0 or value == 1
-        assert self.contains(x, y)
         self._data[y][x] = value
 
     def get(self, x, y) -> int:
-        assert 0 <= x < FIELD_COLS and 0 <= y < FIELD_ROWS
         return self._data[y][x]
 
     def get_row(self, y) -> List[int]:
-        assert 0 <= y < FIELD_ROWS
         return self._data[y]
 
     def set_data(self, data):
-        assert isinstance(data, list)
-        assert len(data) == FIELD_ROWS
-        assert all(map(lambda row: isinstance(row, list), data))
-        assert all(map(lambda row: len(row) == FIELD_COLS, data))
-        assert all(map(lambda value: type(value) == int and 0 <= value <= 1, [value for row in data for value in row]))
         self._data = data
 
     @staticmethod
