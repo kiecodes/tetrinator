@@ -23,6 +23,7 @@ class BaseController:
         if not info["is_animating"] and self.last_stone_index != info["stone_index"]:
             self.last_stone_index = info["stone_index"]
             self._on_new_stone()
+            self.next_action = ButtonAction.NOTHING
         else:
             # if there is currently no move present, do nothing
             if self.move is None:
