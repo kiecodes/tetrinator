@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import ANY
 
 from moves import Field, Stone, Evaluation, Move, evaluate_all_possible_moves
+from moves.evaluate import col_heights, evaluate_height
 from moves.moves import insert_stone, StoneOutOfFieldError, StonesInterceptionError, place_stone
 
 
@@ -174,7 +175,7 @@ class TestMoves(unittest.TestCase):
     def test_place_stone_in_empty_field(self):
         field = Field()
         stone = Stone(0)
-        x, y, field = place_stone(field, stone, -1)
+        x, y, field = place_stone(field, stone, -1, evaluate_height(col_heights(field)))
 
         self.assertEqual(-1, x)
         self.assertEqual(16, y)
@@ -208,7 +209,7 @@ class TestMoves(unittest.TestCase):
         field = Field()
         field.set(0, 19, 1)
         stone = Stone(0)
-        x, y, field = place_stone(field, stone, -1)
+        x, y, field = place_stone(field, stone, -1, evaluate_height(col_heights(field)))
 
         self.assertEqual(-1, x)
         self.assertEqual(15, y)
@@ -242,11 +243,11 @@ class TestMoves(unittest.TestCase):
     def test_place_stone_on_top_of_other_stone_way_up(self):
         field = Field()
         field.set(0, 12, 1)
-        stone = Stone(0)
-        x, y, field = place_stone(field, stone, -1)
+        stone = Stone(2)
+        x, y, field = place_stone(field, stone, -1, evaluate_height(col_heights(field)))
 
         self.assertEqual(-1, x)
-        self.assertEqual(8, y)
+        self.assertEqual(9, y)
 
         self.assertEqual(
             field,
@@ -261,9 +262,9 @@ class TestMoves(unittest.TestCase):
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

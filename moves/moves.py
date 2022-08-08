@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List, Tuple
 
 from moves import Field, Stone, Evaluation
-from moves.evaluate import evaluate_field
+from moves.evaluate import evaluate_field, evaluate_height, col_heights
 from moves.field import FIELD_ROWS, FIELD_COLS
 from moves.stone import STONE_SIZE
 
@@ -30,8 +30,6 @@ def can_insert_stone(field: Field, stone: Stone, x: int, y: int) -> bool:
     return True
 
 
-
-
 def insert_stone(field: Field, stone: Stone, x: int, y: int) -> Field:
     set_coordinates = []
     for stone_x in range(STONE_SIZE):
@@ -55,9 +53,9 @@ def insert_stone(field: Field, stone: Stone, x: int, y: int) -> Field:
     return field
 
 
-def place_stone(field: Field, stone: Stone, col: int) -> Tuple[int, int, Field]:
+def place_stone(field: Field, stone: Stone, col: int, field_height: int) -> Tuple[int, int, Field]:
     stone_offset = stone.get_height()-STONE_SIZE
-    for y in range(stone_offset, FIELD_ROWS-STONE_SIZE+1):
+    for y in range(FIELD_ROWS-field_height+stone_offset-1, FIELD_ROWS-STONE_SIZE+1):
         try:
             can_insert_stone(field, stone, col, y)
         except StonesInterceptionError:
@@ -76,10 +74,11 @@ class Move:
 
 def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Move]:
     moves = []
+    field_height = evaluate_height(col_heights(field))
     for _ in range(stone.num_rotations()):
         for col in range(-2, FIELD_COLS-2):
             try:
-                x, y, resulting_field = place_stone(deepcopy(field), stone, col)
+                x, y, resulting_field = place_stone(deepcopy(field), stone, col, field_height)
                 evaluation = evaluate_field(resulting_field)
                 moves.append(Move(
                     evaluation=evaluation,
