@@ -54,8 +54,7 @@ def insert_stone(field: Field, stone: Stone, x: int, y: int) -> Field:
 
 
 def place_stone(field: Field, stone: Stone, col: int, field_height: int) -> Tuple[int, int, Field]:
-    stone_offset = stone.get_height()-STONE_SIZE
-    for y in range(FIELD_ROWS-field_height+stone_offset-1, FIELD_ROWS-STONE_SIZE+1):
+    for y in range(FIELD_ROWS-field_height-STONE_SIZE, FIELD_ROWS-STONE_SIZE+1):
         try:
             can_insert_stone(field, stone, col, y)
         except StonesInterceptionError:
