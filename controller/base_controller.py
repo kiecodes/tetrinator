@@ -6,8 +6,10 @@ from moves import Move
 
 
 class BaseController:
-    def __init__(self, env: TetrisEnv, get_move_func: Callable[[Observation, Dict], Move]):
+    def __init__(self, env: TetrisEnv, get_move_func: Callable[[Observation, Dict], Move], max_num_moves=None):
         self.last_stone_index = -1
+        self.num_moves = 0
+        self.max_num_moves = max_num_moves
         self.env = env
         self.get_move_func = get_move_func
         self.move: Optional[Move] = None
@@ -17,11 +19,16 @@ class BaseController:
     def action(self) -> bool:
         observation_data, reward, done, info = self.env.step(self.next_action.value)
         self.score = info["score"]
+
+        if self.max_num_moves is not None and self.num_moves > self.max_num_moves:
+            done = True
+
         if done:
             return False
 
         if not info["is_animating"] and self.last_stone_index != info["stone_index"]:
             self.last_stone_index = info["stone_index"]
+            self.num_moves = self.num_moves + 1
             self._on_new_stone()
             self.next_action = ButtonAction.NOTHING
         else:
