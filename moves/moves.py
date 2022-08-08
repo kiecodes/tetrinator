@@ -78,7 +78,7 @@ def evaluate_all_possible_moves(field: Field, stone: Stone) -> List[Move]:
     for _ in range(stone.num_rotations()):
         for col in range(-2, FIELD_COLS-2):
             try:
-                x, y, resulting_field = place_stone(deepcopy(field), stone, col, field_height)
+                x, y, resulting_field = place_stone(field.copy(), stone, col, field_height)
                 evaluation = evaluate_field(resulting_field)
                 moves.append(Move(
                     evaluation=evaluation,
