@@ -1,31 +1,31 @@
 import unittest
 
 from moves import Field, Evaluation
-from moves.evaluate import evaluate_height, evaluate_lines_cleared, evaluate_holes, evaluate_bumpiness, evaluate_bumps,\
-    evaluate_field
+from moves.evaluate import evaluate_height, evaluate_lines_cleared, evaluate_holes, evaluate_bumpiness, evaluate_bumps, \
+    evaluate_field, col_heights
 from moves.field import FIELD_COLS, FIELD_ROWS
 
 
 class TestEvaluate(unittest.TestCase):
     def test_height_empty_field(self):
-        self.assertEqual(0, evaluate_height(Field()))
+        self.assertEqual(0, evaluate_height(col_heights(Field())))
 
     def test_height_with_one_piece(self):
         field = Field()
         field.set(0, 19, 1)
-        self.assertEqual(1, evaluate_height(field))
+        self.assertEqual(1, evaluate_height(col_heights(field)))
 
         field = Field()
         field.set(9, 19, 1)
-        self.assertEqual(1, evaluate_height(field))
+        self.assertEqual(1, evaluate_height(col_heights(field)))
 
         field = Field()
         field.set(0, 0, 1)
-        self.assertEqual(20, evaluate_height(field))
+        self.assertEqual(20, evaluate_height(col_heights(field)))
 
         field = Field()
         field.set(9, 0, 1)
-        self.assertEqual(20, evaluate_height(field))
+        self.assertEqual(20, evaluate_height(col_heights(field)))
 
     def test_height_with_landscape(self):
         field = Field(data=[
@@ -50,7 +50,7 @@ class TestEvaluate(unittest.TestCase):
                 [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             ])
-        self.assertEqual(6, evaluate_height(field))
+        self.assertEqual(6, evaluate_height(col_heights(field)))
 
     def test_lines_cleared_empty_field(self):
         self.assertEqual(0, evaluate_lines_cleared(Field()))
@@ -124,31 +124,31 @@ class TestEvaluate(unittest.TestCase):
         self.assertEqual(6, evaluate_holes(field))
 
     def test_bumpiness_empty_field(self):
-        self.assertEqual(0, evaluate_bumpiness(Field()))
+        self.assertEqual(0, evaluate_bumpiness(col_heights(Field())))
 
     def test_bumpiness_one_block(self):
         field = Field()
         field.set(0, 19, 1)
-        self.assertEqual(1, evaluate_bumpiness(field))
+        self.assertEqual(1, evaluate_bumpiness(col_heights(field)))
 
     def test_bumpiness_two_blocks_next_to_each_other(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(1, 19, 1)
-        self.assertEqual(1, evaluate_bumpiness(field))
+        self.assertEqual(1, evaluate_bumpiness(col_heights(field)))
 
     def test_bumpiness_two_blocks_on_top_of_each_other(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(0, 18, 1)
-        self.assertEqual(2, evaluate_bumpiness(field))
+        self.assertEqual(2, evaluate_bumpiness(col_heights(field)))
 
     def test_bumpiness_two_blocks_on_top_of_each_other_and_one_next_to_it(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(1, 19, 1)
         field.set(0, 18, 1)
-        self.assertEqual(2, evaluate_bumpiness(field))
+        self.assertEqual(2, evaluate_bumpiness(col_heights(field)))
 
     def test_bumpiness_with_landscape(self):
         field = Field(data=[
@@ -173,7 +173,7 @@ class TestEvaluate(unittest.TestCase):
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ])
-        self.assertEqual(10, evaluate_bumpiness(field))
+        self.assertEqual(10, evaluate_bumpiness(col_heights(field)))
 
     def test_bumpiness_with_almost_tetris(self):
         field = Field(data=[
@@ -198,34 +198,34 @@ class TestEvaluate(unittest.TestCase):
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
         ])
-        self.assertEqual(4, evaluate_bumpiness(field))
+        self.assertEqual(4, evaluate_bumpiness(col_heights(field)))
 
     def test_bumps_empty_field(self):
-        self.assertEqual(0, evaluate_bumps(Field()))
+        self.assertEqual(0, evaluate_bumps(col_heights(Field())))
 
     def test_bumps_one_block(self):
         field = Field()
         field.set(0, 19, 1)
-        self.assertEqual(1, evaluate_bumps(field))
+        self.assertEqual(1, evaluate_bumps(col_heights(field)))
 
     def test_bumps_two_blocks_next_to_each_other(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(1, 19, 1)
-        self.assertEqual(1, evaluate_bumps(field))
+        self.assertEqual(1, evaluate_bumps(col_heights(field)))
 
     def test_bumps_two_blocks_on_top_of_each_other(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(0, 18, 1)
-        self.assertEqual(1, evaluate_bumps(field))
+        self.assertEqual(1, evaluate_bumps(col_heights(field)))
 
     def test_bumps_two_blocks_on_top_of_each_other_and_one_next_to_it(self):
         field = Field()
         field.set(0, 19, 1)
         field.set(1, 19, 1)
         field.set(0, 18, 1)
-        self.assertEqual(2, evaluate_bumps(field))
+        self.assertEqual(2, evaluate_bumps(col_heights(field)))
 
     def test_bumps_with_landscape(self):
         field = Field(data=[
@@ -250,7 +250,7 @@ class TestEvaluate(unittest.TestCase):
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ])
-        self.assertEqual(9, evaluate_bumps(field))
+        self.assertEqual(9, evaluate_bumps(col_heights(field)))
 
     def test_bumps_with_almost_tetris(self):
         field = Field(data=[
@@ -275,7 +275,7 @@ class TestEvaluate(unittest.TestCase):
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
         ])
-        self.assertEqual(1, evaluate_bumps(field))
+        self.assertEqual(1, evaluate_bumps(col_heights(field)))
 
     def test_evaluate_field_on_empty_field(self):
         self.assertEqual(

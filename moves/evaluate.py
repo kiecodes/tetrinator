@@ -13,14 +13,12 @@ def _col_height(field: Field, col) -> int:
     return height
 
 
-def evaluate_height(field: Field) -> int:
-    height = 0
-    for x in range(FIELD_COLS):
-        col_height = _col_height(field, x)
-        if height < col_height:
-            height = col_height
+def col_heights(field: Field) -> List[int]:
+    return [_col_height(field, x) for x in range(FIELD_COLS)]
 
-    return height
+
+def evaluate_height(heights) -> int:
+    return max(heights)
 
 
 def evaluate_lines_cleared(field: Field) -> int:
@@ -46,14 +44,12 @@ def evaluate_holes(field: Field) -> int:
     return num_holes
 
 
-def evaluate_bumpiness(field: Field) -> int:
-    heights = [_col_height(field, x) for x in range(FIELD_COLS)]
+def evaluate_bumpiness(heights) -> int:
     bumps = [abs(a-b) for a, b in zip(heights[:-1], heights[1:])]
     return sum(bumps)
 
 
-def evaluate_bumps(field: Field) -> int:
-    heights = [_col_height(field, x) for x in range(FIELD_COLS)]
+def evaluate_bumps(heights) -> int:
     bumps = [a != b for a, b in zip(heights[:-1], heights[1:])]
     return sum(bumps)
 
@@ -70,11 +66,12 @@ class Evaluation:
 
 
 def evaluate_field(field: Field) -> Evaluation:
-    bumpiness = evaluate_bumpiness(field)
-    bumps = evaluate_bumps(field)
+    heights = col_heights(field)
+    bumpiness = evaluate_bumpiness(heights)
+    bumps = evaluate_bumps(heights)
 
     return Evaluation(
-        height=evaluate_height(field),
+        height=evaluate_height(heights),
         lines_cleared=evaluate_lines_cleared(field),
         holes=evaluate_holes(field),
         bumpiness=bumpiness,
