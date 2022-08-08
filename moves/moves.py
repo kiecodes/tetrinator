@@ -18,7 +18,7 @@ class StonesInterceptionError(Exception):
 
 def can_insert_stone(field: Field, stone: Stone, x: int, y: int) -> bool:
     for stone_x in range(STONE_SIZE):
-        for stone_y in range(STONE_SIZE):
+        for stone_y in range(stone.get_height(), STONE_SIZE):
             field_x = x + stone_x
             field_y = y + stone_y
             if not field.contains(field_x, field_y) and stone.get(stone_x, stone_y) > 0:
